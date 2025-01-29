@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多音频播放器</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            background: #f8f9fa;
+        }
+
+        .audio-row {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, #e0e0e0 50%, transparent 100%);
+            margin: 30px 0;
+        }
+
+        .play-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #2196F3;
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            margin-right: 20px;
+            transition: all 0.2s;
+        }
+
+        .play-btn.playing {
+            background: #FF5722;
+        }
+
+        .speed-controls {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .speed-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 15px;
+            background: #f0f0f0;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .speed-btn.active {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 2px 4px rgba(76,175,80,0.2);
+        }
+
+        .download-btn {
+            margin-left: 20px;
+            padding: 8px 15px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .track-info {
+            flex-grow: 1;
+            color: #333;
+            font-size: 16px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- 第1行 -->
+    <div class="audio-row">
+        <button class="play-btn" data-audio="audio1">▶</button>
+        <span class="track-info">出26-28</span>
+        <div class="speed-controls">
+            <button class="speed-btn" data-speed="0.8">0.8x</button>
+            <button class="speed-btn" data-speed="0.9">0.9x</button>
+            <button class="speed-btn active" data-speed="1.0">1.0x</button>
+            <button class="speed-btn" data-speed="1.1">1.1x</button>
+        </div>
+        <a href="2出26-28.mp3" download class="download-btn">下载</a>
+        <audio id="audio1" src="2出26-28.mp3"></audio>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 第2行 -->
+    <div class="audio-row">
+        <button class="play-btn" data-audio="audio2">▶</button>
+        <span class="track-info">出29-31</span>
+        <div class="speed-controls">
+            <button class="speed-btn" data-speed="0.8">0.8x</button>
+            <button class="speed-btn" data-speed="0.9">0.9x</button>
+            <button class="speed-btn active" data-speed="1.0">1.0x</button>
+            <button class="speed-btn" data-speed="1.1">1.1x</button>
+        </div>
+        <a href="2出29-31.mp3" download class="download-btn">下载</a>
+        <audio id="audio2" src="2出29-31.mp3"></audio>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 第3-6行 (重复结构) -->
+    <div class="audio-row">
+        <button class="play-btn" data-audio="audio3">▶</button>
+        <span class="track-info">出32-34</span>
+        <div class="speed-controls">
+            <button class="speed-btn" data-speed="0.8">0.8x</button>
+            <button class="speed-btn" data-speed="0.9">0.9x</button>
+            <button class="speed-btn active" data-speed="1.0">1.0x</button>
+            <button class="speed-btn" data-speed="1.1">1.1x</button>
+        </div>
+        <a href="2出32-34.mp3" download class="download-btn">下载</a>
+        <audio id="audio3" src="2出32-34.mp3"></audio>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="audio-row">
+        <button class="play-btn" data-audio="audio4">▶</button>
+        <span class="track-info">出35-37</span>
+        <div class="speed-controls">
+            <button class="speed-btn" data-speed="0.8">0.8x</button>
+            <button class="speed-btn" data-speed="0.9">0.9x</button>
+            <button class="speed-btn active" data-speed="1.0">1.0x</button>
+            <button class="speed-btn" data-speed="1.1">1.1x</button>
+        </div>
+        <a href="2出35-37.mp3" download class="download-btn">下载</a>
+        <audio id="audio4" src="2出35-37.mp3"></audio>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="audio-row">
+        <button class="play-btn" data-audio="audio5">▶</button>
+        <span class="track-info">出38-40</span>
+        <div class="speed-controls">
+            <button class="speed-btn" data-speed="0.8">0.8x</button>
+            <button class="speed-btn" data-speed="0.9">0.9x</button>
+            <button class="speed-btn active" data-speed="1.0">1.0x</button>
+            <button class="speed-btn" data-speed="1.1">1.1x</button>
+        </div>
+        <a href="2出38-40.mp3" download class="download-btn">下载</a>
+        <audio id="audio5" src="2出38-40.mp3"></audio>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="audio-row">
+        <button class="play-btn" data-audio="audio6">▶</button>
+        <span class="track-info">利1-5</span>
+        <div class="speed-controls">
+            <button class="speed-btn" data-speed="0.8">0.8x</button>
+            <button class="speed-btn" data-speed="0.9">0.9x</button>
+            <button class="speed-btn active" data-speed="1.0">1.0x</button>
+            <button class="speed-btn" data-speed="1.1">1.1x</button>
+        </div>
+        <a href="3利1-5.mp3" download class="download-btn">下载</a>
+        <audio id="audio6" src="3利1-5.mp3"></audio>
+    </div>
+
+    <script>
+        // 播放/暂停控制
+        document.querySelectorAll('.play-btn').forEach(btn => {
+            const audio = document.getElementById(btn.dataset.audio);
+            
+            btn.addEventListener('click', () => {
+                // 暂停所有其他音频
+                document.querySelectorAll('audio').forEach(otherAudio => {
+                    if (otherAudio !== audio) {
+                        otherAudio.pause();
+                        otherAudio.parentElement.querySelector('.play-btn').textContent = '▶';
+                        otherAudio.parentElement.querySelector('.play-btn').classList.remove('playing');
+                    }
+                });
+
+                if (audio.paused) {
+                    audio.play();
+                    btn.textContent = '⏸';
+                    btn.classList.add('playing');
+                } else {
+                    audio.pause();
+                    btn.textContent = '▶';
+                    btn.classList.remove('playing');
+                }
+            });
+        });
+
+        // 速度控制
+        document.querySelectorAll('.speed-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const parentRow = this.closest('.audio-row');
+                const audio = parentRow.querySelector('audio');
+                const speed = parseFloat(this.dataset.speed);
+                
+                // 更新播放速度
+                audio.playbackRate = speed;
+                
+                // 更新按钮状态
+                parentRow.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // 音频播放结束重置按钮
+        document.querySelectorAll('audio').forEach(audio => {
+            audio.addEventListener('ended', () => {
+                const btn = audio.parentElement.querySelector('.play-btn');
+                btn.textContent = '▶';
+                btn.classList.remove('playing');
+            });
+        });
+    </script>
+</body>
+</html>
