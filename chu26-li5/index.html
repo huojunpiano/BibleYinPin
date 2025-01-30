@@ -4,158 +4,182 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>圣经音频播放器</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            background: #f8f9fa;
-            padding: 0 15px;
-        }
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        max-width: 800px;
+        margin: 20px auto;
+        background: #f8f9fa;
+        padding: 0 15px;
+    }
 
+    .audio-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 6px;
+        gap: 8px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+
+    /* 增强进度条效果 */
+    .audio-row::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: var(--progress, 0%);
+        background: linear-gradient(
+            90deg,
+            rgba(33, 150, 243, 0.25) 0%,
+            rgba(76, 175, 80, 0.35) 100%
+        );
+        z-index: 0;
+        transition: width 0.3s linear;
+        box-shadow: 
+            inset 2px 0 5px rgba(0,0,0,0.08),
+            inset -1px 0 2px rgba(255,255,255,0.1);
+    }
+
+    /* 播放状态指示 */
+    .audio-row.playing {
+        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        transform: scale(1.008);
+        border-color: #e0e0e0;
+    }
+
+    .play-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #2196F3;
+        color: white;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+        -webkit-tap-highlight-color: transparent;
+        transition: 
+            background 0.2s,
+            transform 0.2s;
+    }
+
+    .play-btn::after {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+    }
+
+    .play-btn.loading::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border: 2px solid white;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    .track-info {
+        flex: 1;
+        color: #333;
+        font-size: 15px;
+        min-width: 120px;
+        padding-right: 10px;
+        position: relative;
+        z-index: 1;
+        font-weight: 500;
+    }
+
+    .speed-controls {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 4px;
+        min-width: 130px;
+    }
+
+    .speed-row {
+        display: contents;
+    }
+
+    .speed-btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 15px;
+        background: #f0f0f0;
+        color: #666;
+        cursor: pointer;
+        font-size: 13px;
+        white-space: nowrap;
+        transition: all 0.2s;
+        text-align: center;
+        min-width: 60px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .speed-btn.active {
+        background: #4CAF50;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 480px) {
         .audio-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 6px;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s;
+            padding: 10px;
         }
-
-        /* 背景进度条 */
-        .audio-row::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: var(--progress, 0%);
-            background: linear-gradient(90deg, rgba(33,150,243,0.1) 0%, rgba(76,175,80,0.1) 100%);
-            z-index: 0;
-            transition: width 0.3s linear;
-        }
-
-        .play-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #2196F3;
-            color: white;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            flex-shrink: 0;
-            position: relative;
-            z-index: 1;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* 移动端热区 */
-        .play-btn::after {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-        }
-
-        /* 加载动画 */
-        .play-btn.loading::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            width: 20px;
-            height: 20px;
-            margin: -10px 0 0 -10px;
-            border: 2px solid white;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        .track-info {
-            flex: 1;
-            color: #333;
-            font-size: 15px;
-            min-width: 120px;
-            padding-right: 10px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .speed-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-left: auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .speed-row {
-            display: flex;
-            gap: 4px;
-        }
-
         .speed-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 15px;
-            background: #f0f0f0;
-            color: #666;
-            cursor: pointer;
-            font-size: 13px;
-            white-space: nowrap;
-            transition: all 0.2s;
+            padding: 5px 8px;
+            font-size: 12px;
+            min-width: 50px;
         }
+        .play-btn {
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
+        }
+        .play-btn:hover {
+            transform: none !important;
+        }
+        .speed-controls {
+            min-width: 110px;
+        }
+    }
 
-        .speed-btn.active {
-            background: #4CAF50;
-            color: white;
+    @media (hover: hover) {
+        .play-btn:hover {
+            background: #1976D2;
+            transform: scale(1.05);
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .speed-btn:hover {
+            background: #e0e0e0;
         }
-
-        @media (max-width: 480px) {
-            .audio-row {
-                padding: 10px;
-            }
-            .speed-btn {
-                padding: 5px 10px;
-                font-size: 12px;
-            }
-            .play-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 16px;
-            }
-            /* 禁用移动端hover */
-            .play-btn:hover {
-                transform: none !important;
-            }
+        .speed-btn.active:hover {
+            background: #45a049;
         }
-
-        /* PC端hover效果 */
-        @media (hover: hover) {
-            .play-btn:hover {
-                background: #1976D2;
-                transform: scale(1.05);
-            }
-            .speed-btn:hover {
-                background: #e0e0e0;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
     <!-- 第1行 -->
@@ -166,8 +190,6 @@
             <div class="speed-row">
                 <button class="speed-btn" data-speed="0.8">0.8x</button>
                 <button class="speed-btn" data-speed="0.9">0.9x</button>
-            </div>
-            <div class="speed-row">
                 <button class="speed-btn active" data-speed="1.0">1.0x</button>
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
@@ -185,8 +207,6 @@
             <div class="speed-row">
                 <button class="speed-btn" data-speed="0.8">0.8x</button>
                 <button class="speed-btn" data-speed="0.9">0.9x</button>
-            </div>
-            <div class="speed-row">
                 <button class="speed-btn active" data-speed="1.0">1.0x</button>
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
@@ -204,8 +224,6 @@
             <div class="speed-row">
                 <button class="speed-btn" data-speed="0.8">0.8x</button>
                 <button class="speed-btn" data-speed="0.9">0.9x</button>
-            </div>
-            <div class="speed-row">
                 <button class="speed-btn active" data-speed="1.0">1.0x</button>
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
@@ -223,8 +241,6 @@
             <div class="speed-row">
                 <button class="speed-btn" data-speed="0.8">0.8x</button>
                 <button class="speed-btn" data-speed="0.9">0.9x</button>
-            </div>
-            <div class="speed-row">
                 <button class="speed-btn active" data-speed="1.0">1.0x</button>
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
@@ -242,8 +258,6 @@
             <div class="speed-row">
                 <button class="speed-btn" data-speed="0.8">0.8x</button>
                 <button class="speed-btn" data-speed="0.9">0.9x</button>
-            </div>
-            <div class="speed-row">
                 <button class="speed-btn active" data-speed="1.0">1.0x</button>
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
@@ -261,8 +275,6 @@
             <div class="speed-row">
                 <button class="speed-btn" data-speed="0.8">0.8x</button>
                 <button class="speed-btn" data-speed="0.9">0.9x</button>
-            </div>
-            <div class="speed-row">
                 <button class="speed-btn active" data-speed="1.0">1.0x</button>
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
@@ -272,94 +284,93 @@
         </audio>
     </div>
 
-    <script>
-        let currentPlaying = {
-            row: null,
-            audio: null,
-            handler: null
-        };
+<script>
+    let currentPlaying = {
+        row: null,
+        audio: null,
+        progressHandler: null
+    };
 
-        // 预加载前3%音频
-        document.querySelectorAll('audio').forEach(audio => {
-            audio.addEventListener('loadedmetadata', () => {
-                if (audio.duration > 0) {
-                    audio.currentTime = audio.duration * 0.03;
-                }
-            });
+    // 预加载前3%音频
+    document.querySelectorAll('audio').forEach(audio => {
+        audio.addEventListener('loadedmetadata', () => {
+            if (audio.duration > 0) {
+                audio.currentTime = Math.min(audio.duration * 0.03, 10); // 最多预加载10秒
+            }
         });
+    });
 
-        // 播放控制
-        document.querySelectorAll('.play-btn').forEach(btn => {
-            const row = btn.closest('.audio-row');
-            const audio = row.querySelector('audio');
+    document.querySelectorAll('.play-btn').forEach(btn => {
+        const row = btn.closest('.audio-row');
+        const audio = row.querySelector('audio');
 
-            btn.addEventListener('click', async function() {
-                if (currentPlaying.row && currentPlaying.row !== row) {
-                    currentPlaying.audio.pause();
-                    currentPlaying.audio.currentTime = 0;
-                    if (currentPlaying.handler) {
-                        currentPlaying.audio.removeEventListener('timeupdate', currentPlaying.handler);
-                    }
-                    currentPlaying.row.querySelector('.play-btn').textContent = '▶';
-                    currentPlaying.row.style.setProperty('--progress', '0%');
-                }
+        btn.addEventListener('click', async function() {
+            // 处理跨行切换
+            if (currentPlaying.row && currentPlaying.row !== row) {
+                currentPlaying.audio.pause();
+                currentPlaying.audio.currentTime = 0; // 重置其他行进度
+                currentPlaying.row.querySelector('.play-btn').textContent = '▶';
+                currentPlaying.row.style.setProperty('--progress', '0%');
+            }
 
+            try {
+                // 同一行的播放控制
                 if (audio.paused) {
-                    try {
+                    // 如果是首次播放或切换回来
+                    if (currentPlaying.row !== row) {
                         audio.currentTime = 0;
-                        currentPlaying.row = row;
-                        currentPlaying.audio = audio;
-                        
-                        this.classList.add('loading');
-                        await audio.play();
-                        this.textContent = '⏸';
-                        
-                        const progressHandler = () => {
-                            const progress = (audio.currentTime / audio.duration) * 100;
-                            row.style.setProperty('--progress', `${progress}%`);
-                        };
-                        
-                        audio.addEventListener('timeupdate', progressHandler);
-                        currentPlaying.handler = progressHandler;
-                        
-                    } catch (err) {
-                        console.error('播放失败:', err);
-                    } finally {
-                        this.classList.remove('loading');
                     }
+                    
+                    currentPlaying.row = row;
+                    currentPlaying.audio = audio;
+                    
+                    this.classList.add('loading');
+                    await audio.play();
+                    this.textContent = '⏸';
+                    
+                    // 进度更新函数
+                    const progressHandler = () => {
+                        const progress = (audio.currentTime / audio.duration) * 100;
+                        row.style.setProperty('--progress', `${progress}%`);
+                    };
+                    
+                    audio.addEventListener('timeupdate', progressHandler);
+                    currentPlaying.progressHandler = progressHandler;
+                    
                 } else {
+                    // 暂停当前行
                     audio.pause();
-                    audio.currentTime = 0;
                     this.textContent = '▶';
-                    row.style.setProperty('--progress', '0%');
-                    currentPlaying.row = null;
                 }
-            });
-
-            audio.addEventListener('ended', () => {
-                btn.textContent = '▶';
-                row.style.setProperty('--progress', '0%');
-                currentPlaying.row = null;
-            });
+            } catch (err) {
+                console.error('播放失败:', err);
+            } finally {
+                this.classList.remove('loading');
+            }
         });
 
-        // 速度控制（修复版）
-        document.querySelectorAll('.speed-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const row = this.closest('.audio-row');
-                const audio = row.querySelector('audio');
-                const speed = parseFloat(this.dataset.speed);
-                
-                // 设置播放速度
-                audio.playbackRate = speed;
-                
-                // 更新按钮状态
-                this.closest('.speed-controls').querySelectorAll('.speed-btn').forEach(b => {
-                    b.classList.remove('active');
-                });
-                this.classList.add('active');
-            });
+        audio.addEventListener('ended', () => {
+            btn.textContent = '▶';
+            row.style.setProperty('--progress', '0%');
+            audio.currentTime = 0; // 播放结束重置位置
+            currentPlaying.row = null;
         });
-    </script>
+    });
+
+    // 速度控制逻辑保持不变
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const row = this.closest('.audio-row');
+            const audio = row.querySelector('audio');
+            const speed = parseFloat(this.dataset.speed);
+            
+            audio.playbackRate = speed;
+            this.closest('.speed-controls').querySelectorAll('.speed-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            this.classList.add('active');
+        });
+    });
+</script>
 </body>
 </html>
