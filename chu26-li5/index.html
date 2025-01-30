@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>圣经音频播放</title>
+    <title>圣经音频播放器</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -24,6 +24,21 @@
             margin-bottom: 6px;
             gap: 8px;
             position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        /* 背景进度条 */
+        .audio-row::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--progress, 0%);
+            background: linear-gradient(90deg, rgba(33,150,243,0.1) 0%, rgba(76,175,80,0.1) 100%);
+            z-index: 0;
+            transition: width 0.3s linear;
         }
 
         .play-btn {
@@ -37,11 +52,11 @@
             cursor: pointer;
             flex-shrink: 0;
             position: relative;
+            z-index: 1;
             -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
         }
 
-        /* 移动端热区扩展 */
+        /* 移动端热区 */
         .play-btn::after {
             content: "";
             position: absolute;
@@ -51,12 +66,29 @@
             bottom: -10px;
         }
 
+        /* 加载动画 */
+        .play-btn.loading::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
         .track-info {
             flex: 1;
             color: #333;
             font-size: 15px;
             min-width: 120px;
             padding-right: 10px;
+            position: relative;
+            z-index: 1;
         }
 
         .speed-controls {
@@ -64,6 +96,8 @@
             flex-direction: column;
             gap: 4px;
             margin-left: auto;
+            position: relative;
+            z-index: 1;
         }
 
         .speed-row {
@@ -80,6 +114,7 @@
             cursor: pointer;
             font-size: 13px;
             white-space: nowrap;
+            transition: all 0.2s;
         }
 
         .speed-btn.active {
@@ -87,24 +122,8 @@
             color: white;
         }
 
-        /* 加载进度条 */
-        .loading-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: #eee;
-            border-radius: 0 0 8px 8px;
-            overflow: hidden;
-            display: none;
-        }
-
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: #4CAF50;
-            transition: width 0.3s ease;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         @media (max-width: 480px) {
@@ -120,7 +139,7 @@
                 height: 36px;
                 font-size: 16px;
             }
-            /* 移动端禁用hover */
+            /* 禁用移动端hover */
             .play-btn:hover {
                 transform: none !important;
             }
@@ -131,7 +150,6 @@
             .play-btn:hover {
                 background: #1976D2;
                 transform: scale(1.05);
-                transition: all 0.2s;
             }
             .speed-btn:hover {
                 background: #e0e0e0;
@@ -140,7 +158,7 @@
     </style>
 </head>
 <body>
-    <!-- 音频行结构（示例第一行） -->
+    <!-- 第1行 -->
     <div class="audio-row">
         <button class="play-btn" data-audio="track1">▶</button>
         <span class="track-info">出26-28(周日)</span>
@@ -154,10 +172,7 @@
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
         </div>
-        <div class="loading-progress">
-            <div class="progress-bar"></div>
-        </div>
-        <audio id="track1" preload="none">
+        <audio id="track1" preload="metadata">
             <source src="出26-28.ogg" type="audio/ogg">
         </audio>
     </div>
@@ -176,11 +191,8 @@
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
         </div>
-        <div class="loading-progress">
-            <div class="progress-bar"></div>
-        </div>
-        <audio id="track2" preload="none">
-            <source src="出29-31.ogg" type="audio/ogg; codecs=vorbis">
+        <audio id="track2" preload="metadata">
+            <source src="出29-31.ogg" type="audio/ogg">
         </audio>
     </div>
 
@@ -198,11 +210,8 @@
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
         </div>
-        <div class="loading-progress">
-            <div class="progress-bar"></div>
-        </div>
-        <audio id="track3" preload="none">
-            <source src="出32-34.ogg" type="audio/ogg; codecs=vorbis">
+        <audio id="track3" preload="metadata">
+            <source src="出32-34.ogg" type="audio/ogg">
         </audio>
     </div>
 
@@ -220,11 +229,8 @@
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
         </div>
-        <div class="loading-progress">
-            <div class="progress-bar"></div>
-        </div>
-        <audio id="track4" preload="none">
-            <source src="出35-37.ogg" type="audio/ogg; codecs=vorbis">
+        <audio id="track4" preload="metadata">
+            <source src="出35-37.ogg" type="audio/ogg">
         </audio>
     </div>
 
@@ -242,11 +248,8 @@
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
         </div>
-        <div class="loading-progress">
-            <div class="progress-bar"></div>
-        </div>
-        <audio id="track5" preload="none">
-            <source src="出38-40.ogg" type="audio/ogg; codecs=vorbis">
+        <audio id="track5" preload="metadata">
+            <source src="出38-40.ogg" type="audio/ogg">
         </audio>
     </div>
 
@@ -264,85 +267,99 @@
                 <button class="speed-btn" data-speed="1.1">1.1x</button>
             </div>
         </div>
-        <div class="loading-progress">
-            <div class="progress-bar"></div>
-        </div>
-        <audio id="track6" preload="none">
-            <source src="利1-5.ogg" type="audio/ogg; codecs=vorbis">
+        <audio id="track6" preload="metadata">
+            <source src="利1-5.ogg" type="audio/ogg">
         </audio>
     </div>
 
     <script>
-        document.querySelectorAll('.play-btn').forEach(btn => {
-            const audioId = btn.getAttribute('data-audio');
-            const audio = document.getElementById(audioId);
-            const progressBar = btn.closest('.audio-row').querySelector('.progress-bar');
-            const progressContainer = btn.closest('.audio-row').querySelector('.loading-progress');
-            let shouldAutoPlay = false;
+        let currentPlaying = {
+            row: null,
+            audio: null,
+            handler: null
+        };
 
-            // 点击播放控制
-            btn.addEventListener('click', async function() {
-                if (audio.paused) {
-                    // 显示加载进度
-                    progressContainer.style.display = 'block';
-                    
-                    // 开始加载音频
-                    if (audio.readyState < 3) { // 3=HAVE_FUTURE_DATA
-                        audio.load();
-                    }
-
-                    // 监听缓冲进度
-                    const updateProgress = () => {
-                        const buffered = audio.buffered;
-                        if (buffered.length > 0) {
-                            const percent = (buffered.end(buffered.length - 1) / audio.duration) * 100;
-                            progressBar.style.width = `${percent}%`;
-                            
-                            // 加载超过50%且未播放时自动播放
-                            if (percent >= 50 && !shouldAutoPlay) {
-                                shouldAutoPlay = true;
-                                audio.play().catch(e => console.error('自动播放失败:', e));
-                            }
-                        }
-                    };
-
-                    audio.addEventListener('progress', updateProgress);
-                    
-                    // 播放完成后重置状态
-                    audio.addEventListener('ended', () => {
-                        btn.textContent = '▶';
-                        progressContainer.style.display = 'none';
-                        progressBar.style.width = '0%';
-                    }, { once: true });
-
-                    try {
-                        await audio.play();
-                        btn.textContent = '⏸';
-                    } catch (err) {
-                        console.log('用户取消了播放');
-                    }
-                } else {
-                    audio.pause();
-                    btn.textContent = '▶';
-                    progressContainer.style.display = 'none';
+        // 预加载前3%音频
+        document.querySelectorAll('audio').forEach(audio => {
+            audio.addEventListener('loadedmetadata', () => {
+                if (audio.duration > 0) {
+                    audio.currentTime = audio.duration * 0.03;
                 }
-            });
-
-            // 速度控制
-            btn.closest('.audio-row').querySelectorAll('.speed-btn').forEach(speedBtn => {
-                speedBtn.addEventListener('click', function() {
-                    const speed = parseFloat(this.dataset.speed);
-                    audio.playbackRate = speed;
-                    this.closest('.audio-row').querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                });
             });
         });
 
-        // 移动端优化：禁用hover效果
-        if ('ontouchstart' in window) {
-            document.documentElement.classList.add('touch-device');
-        }
+        // 播放控制
+        document.querySelectorAll('.play-btn').forEach(btn => {
+            const row = btn.closest('.audio-row');
+            const audio = row.querySelector('audio');
+
+            btn.addEventListener('click', async function() {
+                if (currentPlaying.row && currentPlaying.row !== row) {
+                    currentPlaying.audio.pause();
+                    currentPlaying.audio.currentTime = 0;
+                    if (currentPlaying.handler) {
+                        currentPlaying.audio.removeEventListener('timeupdate', currentPlaying.handler);
+                    }
+                    currentPlaying.row.querySelector('.play-btn').textContent = '▶';
+                    currentPlaying.row.style.setProperty('--progress', '0%');
+                }
+
+                if (audio.paused) {
+                    try {
+                        audio.currentTime = 0;
+                        currentPlaying.row = row;
+                        currentPlaying.audio = audio;
+                        
+                        this.classList.add('loading');
+                        await audio.play();
+                        this.textContent = '⏸';
+                        
+                        const progressHandler = () => {
+                            const progress = (audio.currentTime / audio.duration) * 100;
+                            row.style.setProperty('--progress', `${progress}%`);
+                        };
+                        
+                        audio.addEventListener('timeupdate', progressHandler);
+                        currentPlaying.handler = progressHandler;
+                        
+                    } catch (err) {
+                        console.error('播放失败:', err);
+                    } finally {
+                        this.classList.remove('loading');
+                    }
+                } else {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    this.textContent = '▶';
+                    row.style.setProperty('--progress', '0%');
+                    currentPlaying.row = null;
+                }
+            });
+
+            audio.addEventListener('ended', () => {
+                btn.textContent = '▶';
+                row.style.setProperty('--progress', '0%');
+                currentPlaying.row = null;
+            });
+        });
+
+        // 速度控制（修复版）
+        document.querySelectorAll('.speed-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('.audio-row');
+                const audio = row.querySelector('audio');
+                const speed = parseFloat(this.dataset.speed);
+                
+                // 设置播放速度
+                audio.playbackRate = speed;
+                
+                // 更新按钮状态
+                this.closest('.speed-controls').querySelectorAll('.speed-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
     </script>
 </body>
 </html>
