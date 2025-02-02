@@ -291,73 +291,98 @@
         progressHandler: null
     };
 
-    // 预加载前3%音频
-    document.querySelectorAll('audio').forEach(audio => {
-        audio.addEventListener('loadedmetadata', () => {
-            if (audio.duration > 0) {
-                audio.currentTime = Math.min(audio.duration * 0.03, 10); // 最多预加载10秒
-            }
-        });
+    // 初始化音频元素
+    document.querySelectorAll('.audio-row').forEach(row => {
+        const audio = row.querySelector('audio');
+        audio.preload = 'none'; // 禁止预加载
+        audio.load(); // 重置加载状态
     });
 
     document.querySelectorAll('.play-btn').forEach(btn => {
         const row = btn.closest('.audio-row');
         const audio = row.querySelector('audio');
+        let isFirstPlay = true;
 
         btn.addEventListener('click', async function() {
-            // 处理跨行切换
-            if (currentPlaying.row && currentPlaying.row !== row) {
-                currentPlaying.audio.pause();
-                currentPlaying.audio.currentTime = 0; // 重置其他行进度
-                currentPlaying.row.querySelector('.play-btn').textContent = '▶';
-                currentPlaying.row.style.setProperty('--progress', '0%');
-            }
-
             try {
-                // 同一行的播放控制
+                // 暂停其他正在播放的音频
+                if (currentPlaying.row && currentPlaying.row !== row) {
+                    currentPlaying.audio.pause();
+                    currentPlaying.audio.currentTime = 0;
+                    currentPlaying.row.querySelector('.play-btn').textContent = '▶';
+                    currentPlaying.row.style.setProperty('--progress', '0%');
+                }
+
                 if (audio.paused) {
-                    // 如果是首次播放或切换回来
-                    if (currentPlaying.row !== row) {
-                        audio.currentTime = 0;
-                    }
-                    
-                    currentPlaying.row = row;
-                    currentPlaying.audio = audio;
-                    
                     this.classList.add('loading');
-                    await audio.play();
-                    this.textContent = '⏸';
                     
-                    // 进度更新函数
+                    // 微信兼容：必须在用户操作上下文中触发播放
+                    if (isFirstPlay) {
+                        // 首次播放设置音频源
+                        const source = audio.querySelector('source');
+                        audio.src = source.src;
+                        isFirstPlay = false;
+                    }
+
+                    // 绑定进度更新
                     const progressHandler = () => {
-                        const progress = (audio.currentTime / audio.duration) * 100;
+                        const progress = (audio.currentTime / audio.duration) * 100 || 0;
                         row.style.setProperty('--progress', `${progress}%`);
                     };
-                    
+
+                    // 清理旧监听器
+                    audio.removeEventListener('timeupdate', currentPlaying.progressHandler);
                     audio.addEventListener('timeupdate', progressHandler);
-                    currentPlaying.progressHandler = progressHandler;
-                    
+
+                    // 播放控制
+                    audio.playbackRate = parseFloat(
+                        row.querySelector('.speed-btn.active').dataset.speed
+                    );
+
+                    // 微信专用处理：设置超时防止卡死
+                    let playTimeout;
+                    const cleanup = () => {
+                        clearTimeout(playTimeout);
+                        this.classList.remove('loading');
+                    };
+
+                    // 播放尝试
+                    playTimeout = setTimeout(() => {
+                        this.classList.remove('loading');
+                        this.textContent = '▶';
+                        console.error('播放超时');
+                    }, 5000);
+
+                    await audio.play();
+                    cleanup();
+
+                    // 状态更新
+                    currentPlaying = { row, audio, progressHandler };
+                    this.textContent = '⏸';
+                    row.classList.add('playing');
+
+                    // 结束处理
+                    audio.addEventListener('ended', () => {
+                        this.textContent = '▶';
+                        row.style.setProperty('--progress', '0%');
+                        row.classList.remove('playing');
+                    }, { once: true });
+
                 } else {
-                    // 暂停当前行
                     audio.pause();
                     this.textContent = '▶';
+                    row.classList.remove('playing');
                 }
             } catch (err) {
                 console.error('播放失败:', err);
-            } finally {
                 this.classList.remove('loading');
+                this.textContent = '▶';
+                row.classList.remove('playing');
             }
-        });
-
-        audio.addEventListener('ended', () => {
-            btn.textContent = '▶';
-            row.style.setProperty('--progress', '0%');
-            audio.currentTime = 0; // 播放结束重置位置
-            currentPlaying.row = null;
         });
     });
 
-    // 速度控制逻辑保持不变
+    // 速度控制
     document.querySelectorAll('.speed-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const row = this.closest('.audio-row');
