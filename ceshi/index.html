@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>圣经音频下载</title>
+    <title>音频下载</title>
 <style>
     body {
         font-family: 'Arial', sans-serif;
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 15px;
         text-align: center;
+        padding: 20px;
     }
 
     .download-btn {
@@ -21,10 +19,10 @@
         border-radius: 25px;
         font-size: 18px;
         cursor: pointer;
-        transition: background 0.3s;
+        margin: 20px;
     }
 
-    .progress-container {
+    .progress {
         width: 80%;
         height: 20px;
         background: #f0f0f0;
@@ -34,66 +32,94 @@
     }
 
     .progress-bar {
-        width: 0%;
         height: 100%;
         background: #4CAF50;
         border-radius: 10px;
         transition: width 0.3s ease;
     }
 
-    .percentage {
-        font-size: 16px;
+    .status {
+        margin-top: 20px;
         color: #666;
-        margin-top: 10px;
+    }
+
+    .open-btn {
+        display: none;
+        padding: 12px 24px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        margin-top: 15px;
     }
 </style>
 </head>
 <body>
-    <button class="download-btn" onclick="startDownload()">下载音频</button>
+    <button class="download-btn" onclick="startDownload()">点击下载音频</button>
     
-    <div class="progress-container">
-        <div class="progress-bar"></div>
+    <div class="progress">
+        <div class="progress-bar" style="width: 0%"></div>
     </div>
-    <div class="percentage">0%</div>
+    
+    <div class="status">准备下载...</div>
+    <button class="open-btn" onclick="openAudio()">立即播放</button>
 
 <script>
-    function startDownload() {
-        const btn = document.querySelector('.download-btn');
-        const progressContainer = document.querySelector('.progress-container');
-        const progressBar = document.querySelector('.progress-bar');
-        const percentage = document.querySelector('.percentage');
-        
-        btn.disabled = true;
-        btn.textContent = '下载中...';
-        progressContainer.style.display = 'block';
+let audioBlobUrl = null;
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', '6-8.ogg', true);
-        xhr.responseType = 'blob';
+function startDownload() {
+    const btn = document.querySelector('.download-btn');
+    const progress = document.querySelector('.progress');
+    const progressBar = document.querySelector('.progress-bar');
+    const status = document.querySelector('.status');
+    const openBtn = document.querySelector('.open-btn');
 
-        xhr.onprogress = function(e) {
-            if (e.lengthComputable) {
-                const percent = (e.loaded / e.total * 100).toFixed(1);
-                progressBar.style.width = percent + '%';
-                percentage.textContent = percent + '%';
-            }
-        };
+    btn.disabled = true;
+    btn.textContent = '下载中...';
+    progress.style.display = 'block';
+    status.textContent = '正在连接服务器...';
 
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                const blob = xhr.response;
-                const url = URL.createObjectURL(blob);
-                
-                // 自动打开音频文件
-                window.location.href = url;
-                
-                // 清理资源
-                setTimeout(() => URL.revokeObjectURL(url), 10000);
-            }
-        };
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '6-8.ogg', true); // 建议使用MP3格式
+    xhr.responseType = 'blob';
 
-        xhr.send();
+    xhr.onprogress = function(e) {
+        if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percent + '%';
+            status.textContent = `已下载 ${percent}%`;
+        }
+    };
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            const blob = xhr.response;
+            audioBlobUrl = URL.createObjectURL(blob);
+            
+            status.textContent = '下载完成！';
+            openBtn.style.display = 'inline-block';
+            btn.style.display = 'none';
+            
+            // 自动尝试打开（微信可能限制）
+            setTimeout(() => {
+                window.location.href = audioBlobUrl;
+            }, 500);
+        }
+    };
+
+    xhr.send();
+}
+
+function openAudio() {
+    if (audioBlobUrl) {
+        // 兼容微信的打开方式
+        const anchor = document.createElement('a');
+        anchor.href = audioBlobUrl;
+        anchor.target = '_blank';
+        anchor.click();
     }
+}
 </script>
 </body>
 </html>
